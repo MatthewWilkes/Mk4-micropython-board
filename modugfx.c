@@ -166,55 +166,15 @@ STATIC mp_obj_t ugfx_ball_demo(void) {
 	while(1) {
 		// Draw one frame
 		gdispStreamStart(minx, miny, maxx-minx, maxy-miny);
-		for (y=miny; h = (bally-y)*ii, y<maxy; y++) {
+		for (y=miny; y<maxy; y++) {
 			for (x=minx; x < maxx; x++) {
-				g=(ballx-x)*ii;
-				f=-.3*g+.954*h;
-				if (g*g < 1-h*h) {
-					/* The inside of the ball */
-					if ((((int)(9-spin+(.954*g+.3*h)*invsqrt(1-f*f))+(int)(2+f*2))&1))
-						colour = BALLCOLOR1;
-					else
-						colour = BALLCOLOR2;
-				} else {
-					// The background (walls and floor)
-					if (y > height-floor) {
-						if (x < height-y || height-y > width-x)
-							colour = WALLCOLOR;
-						else
-							colour = FLOORCOLOR;
-					} else if (x<floor || x>width-floor)
-						colour = WALLCOLOR;
-					else
-						colour = BACKCOLOR;
-
-					// The ball shadow is darker
-					if (g*(g+.4)+h*(h+.1) < 1)
-						colour = gdispBlendColor(colour, Black, SHADOWALPHA);
-				}
-				gdispStreamColor(colour);	/* pixel to the LCD */
+				gdispStreamColor(RGB2COLOR(x % 255, y % 255, (x * y % 255)));	/* pixel to the LCD */
 			}
 		}
 		gdispStreamStop();
 
 		// Force a display update if the controller supports it
 		gdispFlush();
-
-		// Calculate the new frame size (note this is a drawing optimisation only)
-		minx = ballx - radius; miny = bally - radius;
-		maxx = minx + ballcx; maxy = miny + ballcy;
-		if (dx > 0) maxx += dx; else minx += dx;
-		if (dy > 0) maxy += dy; else miny += dy;
-		if (minx < 0) minx = 0;
-		if (maxx > width) maxx = width;
-		if (miny < 0) miny = 0;
-		if (maxy > height) maxy = height;
-
-		// Motion
-		spin += spinspeed;
-		ballx += dx; bally += dy;
-		dx = ballx < radius || ballx > width-radius ? spinspeed=-spinspeed,-dx : dx;
-		dy = bally > height-1.75*floor ? -.04*height : dy+.002*height;
 	}
 
 
